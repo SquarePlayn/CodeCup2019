@@ -33,6 +33,10 @@ public class Spot {
         return y;
     }
 
+    public String getStringRepresentation() {
+        return "" + (char)('A' + y) + (x+1);
+    }
+
     public Flippo getFlippo() {
         return flippo;
     }

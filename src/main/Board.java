@@ -91,4 +91,28 @@ public class Board {
     public boolean areValidCoordinates(int x, int y) {
         return (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT);
     }
+
+    /**
+     * Receive a spot on the board using its string representation
+     */
+    public Spot getSpot(String string) {
+        if (string.length() < 2) {
+            return null;
+        } else {
+            int x = string.charAt(1) - '1';
+            int y = string.charAt(0) - 'A';
+            return getSpot(x, y);
+        }
+    }
+
+    /**
+     * Retrieve a spot on the board using its coordinates
+     */
+    public Spot getSpot(int x, int y) {
+        if (! areValidCoordinates(x, y)) {
+            return null;
+        } else {
+            return board[x][y];
+        }
+    }
 }
