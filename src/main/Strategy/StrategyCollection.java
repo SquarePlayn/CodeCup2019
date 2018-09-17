@@ -1,6 +1,7 @@
 package main.Strategy;
 
 import main.Board;
+import main.Flippo;
 import main.Spot;
 
 import java.util.HashMap;
@@ -52,8 +53,8 @@ public class StrategyCollection extends Strategy {
     }
 
     @Override
-    public Spot getMove() {
-        return getStrategyInstance().getMove();
+    public Spot getMove(Flippo color) {
+        return getStrategyInstance().getMove(color);
     }
 
 }

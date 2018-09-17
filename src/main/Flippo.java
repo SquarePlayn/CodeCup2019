@@ -3,7 +3,7 @@ package main;
 /**
  * Representation of the coin on one spot
  */
-enum Flippo {
+public enum Flippo {
     NONE, BLACK, WHITE;
 
     public Flippo opposite() {

@@ -1,6 +1,7 @@
 package main.Strategy;
 
 import main.Spot;
+import main.Flippo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,6 @@ public abstract class Strategy {
             FirstPossibleStrategy.class
     );
 
-    public abstract Spot getMove();
+    public abstract Spot getMove(Flippo color);
 
 }
