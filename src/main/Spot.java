@@ -3,6 +3,9 @@ package main;
 import java.util.Collection;
 import java.util.HashMap;
 
+/**
+ * One location on the board
+ */
 public class Spot {
 
     private int x;
@@ -61,4 +64,11 @@ public class Spot {
         neighbours.put(direction, spot);
     }
 
+    public void flip() {
+        if (getFlippo() == Flippo.NONE) {
+            System.err.println("Tried to flip a field with no flippo");
+        } else {
+            setFlippo(getFlippo().opposite());
+        }
+    }
 }

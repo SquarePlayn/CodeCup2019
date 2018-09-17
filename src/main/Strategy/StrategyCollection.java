@@ -5,6 +5,11 @@ import main.Spot;
 
 import java.util.HashMap;
 
+/**
+ * Strategy that is a wrapper around multiple strategies.
+ * Can be used to swap between strategies
+ * Makes sure only one instance of each strategy is created
+ */
 public class StrategyCollection extends Strategy {
 
     private HashMap<Class<? extends Strategy>, Strategy> strategyInstances;

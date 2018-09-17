@@ -2,6 +2,9 @@ package main;
 
 import java.util.*;
 
+/**
+ * Representation of the playboard of WIDTH x HEIGHT spots
+ */
 public class Board {
     public static final int WIDTH = 8;
     public static final int HEIGHT = 8;
@@ -102,6 +105,74 @@ public class Board {
             int x = string.charAt(1) - '1';
             int y = string.charAt(0) - 'A';
             return getSpot(x, y);
+        }
+    }
+
+    /**
+     * Execute the placing of a flippo in all directions
+     * Wrapper for the Spot variant of doMove
+     */
+    public LinkedHashSet<Spot> doMove(String spot, Flippo color) {
+        return doMove(getSpot(spot), color);
+    }
+
+    /**
+     * Execute the placing of a flippo in all directions
+     */
+    public LinkedHashSet<Spot> doMove(Spot spot, Flippo color) {
+        LinkedHashSet<Spot> flipped = new LinkedHashSet<>();
+        if (! spot.isValidPlacementSpot()) {
+            System.err.println("Tried placing a coin on an invalid spot");
+            return null;
+        }
+        for (Direction direction : Direction.values()) {
+            flipped.addAll(doMoveInDirection(spot, color, direction));
+        }
+        spot.setFlippo(color);
+        return flipped;
+    }
+
+    /**
+     * Execute the placement of a flippo in a specified direction
+     */
+    public LinkedHashSet<Spot> doMoveInDirection(Spot spot, Flippo color, Direction direction) {
+        LinkedHashSet<Spot> flipped = new LinkedHashSet<>();
+        if (! spot.isValidPlacementSpot()) {
+            System.err.println("Tried placing a coin on an invalid spot");
+            return null;
+        }
+
+        // For each neighbour untill the end or empty spot
+        Spot neighbour = spot.getNeighbour(direction);
+        LinkedHashSet<Spot> lastSegment = new LinkedHashSet<>();
+        while (neighbour != null && neighbour.getFlippo() != Flippo.NONE) {
+            // If of the same color, flip all in the latest segment and reset segment
+            if (neighbour.getFlippo() == color) {
+                flipped.addAll(lastSegment);
+                lastSegment.forEach(Spot::flip);
+                lastSegment = new LinkedHashSet<>();
+            }
+            lastSegment.add(neighbour);
+            neighbour = neighbour.getNeighbour(direction);
+        }
+        return flipped;
+    }
+
+    public void printBoard() {
+        for (int y = 0; y < HEIGHT; y ++) {
+            for (int x = 0; x < WIDTH; x ++) {
+                Spot spot = getSpot(x, y);
+                if (spot.getFlippo() == Flippo.NONE) {
+                    System.err.print(".");
+                } else if (spot.getFlippo() == Flippo.BLACK) {
+                    System.err.print("X");
+                } else if (spot.getFlippo() == Flippo.WHITE) {
+                    System.err.print("O");
+                } else {
+                    System.err.println("Trying to print a flippo that's not possible");
+                }
+            }
+            System.err.println();
         }
     }
 
