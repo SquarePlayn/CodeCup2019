@@ -28,14 +28,14 @@ class Philippo {
             board.doMove(line, color.opposite());
         }
         for (int i = 0; i < 29; i ++) {
-            Spot move = strategyCollection.getMove();
+            Spot move = strategyCollection.getMove(color);
             System.out.println(move.getStringRepresentation());
             System.out.flush();
             board.doMove(move, color);
             board.printBoard();
             board.doMove(sc.nextLine(), color.opposite());
         }
-        Spot move = strategyCollection.getMove();
+        Spot move = strategyCollection.getMove(color);
         System.out.println(move.getStringRepresentation());
         System.out.flush();
         board.doMove(move, color);

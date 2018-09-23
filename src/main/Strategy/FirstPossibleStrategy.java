@@ -1,6 +1,7 @@
 package main.Strategy;
 
 import main.Board;
+import main.Flippo;
 import main.Spot;
 
 /**
@@ -15,7 +16,7 @@ public class FirstPossibleStrategy extends Strategy {
     }
 
     @Override
-    public Spot getMove() {
-        return board.getValidPlacementSpots().iterator().next();
+    public Spot getMove(Flippo color) {
+        return board.getValidPlacementSpots(color).iterator().next();
     }
 }

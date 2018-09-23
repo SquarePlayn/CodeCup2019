@@ -22,7 +22,8 @@ public class Spot {
 
     /**
      * Returns whether a spot is valid to place a piece on
-     * A spot is valid when it is empty and has a neighbouring piece
+     * A spot is valid when it is empty and has a neighbouring
+     * NB: Does not take into account the need for flipping if possible
      */
     public boolean isValidPlacementSpot() {
         return isEmpty() && ! getNeighbours().stream().allMatch(Spot::isEmpty);

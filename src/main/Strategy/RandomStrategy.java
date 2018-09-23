@@ -1,9 +1,11 @@
 package main.Strategy;
 
 import main.Board;
+import main.Flippo;
 import main.Spot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -12,17 +14,16 @@ import java.util.Random;
 public class RandomStrategy extends Strategy {
 
     private Board board;
-    private Random random;
 
     public RandomStrategy(Board board) {
         this.board = board;
-        this.random = new Random();
     }
 
     @Override
-    public Spot getMove() {
-        ArrayList<Spot> spots = new ArrayList<>(board.getValidPlacementSpots());
-        return spots.get(random.nextInt(spots.size()));
+    public Spot getMove(Flippo color) {
+        ArrayList<Spot> spots = new ArrayList<>(board.getValidPlacementSpots(color));
+        Collections.shuffle(spots);
+        return spots.get(0);
     }
 
 }

@@ -65,9 +65,14 @@ public class Board {
         return emptySpots;
     }
 
-    public LinkedHashSet<Spot> getValidPlacementSpots() {
+    public LinkedHashSet<Spot> getValidPlacementSpots(Flippo color) {
         LinkedHashSet<Spot> validPlacementSpots = new LinkedHashSet<>(getSpotSet());
         validPlacementSpots.removeIf(i -> ! i.isValidPlacementSpot());
+        boolean canFlipSome = validPlacementSpots.stream().anyMatch(i -> getMoveSpots(i, color).size() > 0);
+        if (canFlipSome) {
+            validPlacementSpots.removeIf(i -> getMoveSpots(i, color).size() == 0);
+        }
+
         return validPlacementSpots;
     }
 
@@ -120,36 +125,36 @@ public class Board {
      * Execute the placing of a flippo in all directions
      */
     public LinkedHashSet<Spot> doMove(Spot spot, Flippo color) {
-        LinkedHashSet<Spot> flipped = new LinkedHashSet<>();
-        if (! spot.isValidPlacementSpot()) {
-            System.err.println("Tried placing a coin on an invalid spot");
-            return null;
-        }
-        for (Direction direction : Direction.values()) {
-            flipped.addAll(doMoveInDirection(spot, color, direction));
-        }
+        LinkedHashSet<Spot> flipped = getMoveSpots(spot, color);
+        flipped.forEach(Spot::flip);
         spot.setFlippo(color);
         return flipped;
     }
 
     /**
-     * Execute the placement of a flippo in a specified direction
+     * Get all spots that would be flipped if a Flippo of specified color is placed at the specified spot
      */
-    public LinkedHashSet<Spot> doMoveInDirection(Spot spot, Flippo color, Direction direction) {
+    public LinkedHashSet<Spot> getMoveSpots(Spot spot, Flippo color) {
         LinkedHashSet<Spot> flipped = new LinkedHashSet<>();
-        if (! spot.isValidPlacementSpot()) {
-            System.err.println("Tried placing a coin on an invalid spot");
-            return null;
+        for (Direction direction : Direction.values()) {
+            flipped.addAll(getMoveSpotsInDirection(spot, color, direction));
         }
+        return flipped;
+    }
 
-        // For each neighbour untill the end or empty spot
+    /**
+     * Get all spots that would be flipped in the direction if this color flippo is placed at the spot
+     */
+    public LinkedHashSet<Spot> getMoveSpotsInDirection(Spot spot, Flippo color, Direction direction) {
+        LinkedHashSet<Spot> flipped = new LinkedHashSet<>();
+
+        // For each neighbour until the end or empty spot
         Spot neighbour = spot.getNeighbour(direction);
         LinkedHashSet<Spot> lastSegment = new LinkedHashSet<>();
         while (neighbour != null && neighbour.getFlippo() != Flippo.NONE) {
             // If of the same color, flip all in the latest segment and reset segment
             if (neighbour.getFlippo() == color) {
                 flipped.addAll(lastSegment);
-                lastSegment.forEach(Spot::flip);
                 lastSegment = new LinkedHashSet<>();
             }
             lastSegment.add(neighbour);
