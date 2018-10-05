@@ -13,11 +13,10 @@ import java.util.Random;
  */
 public class RandomStrategy extends Strategy {
 
-    private Board board;
-
     public RandomStrategy(Board board) {
-        this.board = board;
+        super(board);
     }
+
 
     @Override
     public Spot getMove(Flippo color) {

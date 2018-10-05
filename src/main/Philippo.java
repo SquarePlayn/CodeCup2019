@@ -19,11 +19,13 @@ class Philippo {
 
     public void runContest() {
         System.err.println("Philippo running contest");
+
         // TODO NB: The below is just bodge to test
         Scanner sc = new Scanner(System.in);
         String line = sc.nextLine();
         boolean white = line.equals("Start");
         Flippo color = white ? Flippo.WHITE : Flippo.BLACK;
+        System.err.println("Computer plays color " + (white ? "white" : "black"));
         if (! white) {
             board.doMove(line, color.opposite());
         }
@@ -43,7 +45,12 @@ class Philippo {
             board.printBoard();
             board.doMove(sc.nextLine(), color.opposite());
         }
+        Score score = board.getScore();
+        System.err.println("Computer played color " + (white ? "white" : "black"));
+        System.err.println("Final score: Black " + score.get(Flippo.BLACK) +
+                " - " + score.get(Flippo.WHITE) + " White");
         // TODO NB: The above section is full bodge just to test
+
     }
 
     public static void main(String[] args) {

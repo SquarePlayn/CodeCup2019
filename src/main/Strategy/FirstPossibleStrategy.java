@@ -9,10 +9,8 @@ import main.Spot;
  */
 public class FirstPossibleStrategy extends Strategy {
 
-    private Board board;
-
     public FirstPossibleStrategy(Board board) {
-        this.board = board;
+        super(board);
     }
 
     @Override

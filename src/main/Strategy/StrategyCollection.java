@@ -15,12 +15,10 @@ public class StrategyCollection extends Strategy {
 
     private HashMap<Class<? extends Strategy>, Strategy> strategyInstances;
 
-    private Board board;
-
     private Class<? extends Strategy> strategy;
 
     public StrategyCollection(Board board) {
-        this.board = board;
+        super(board);
         this.strategyInstances = new HashMap<>();
         this.strategy = Strategy.DEFAULT_STRATEGY;
     }
@@ -37,7 +35,7 @@ public class StrategyCollection extends Strategy {
                 strategyInstances.put(strategy, strategyInstance);
                 return strategyInstance;
             } catch (Exception e) {
-                System.err.println("Exception when intiating strategy with only board argument");
+                System.err.println("Exception when initiating strategy with only board argument");
                 e.printStackTrace();
                 return null;
             }

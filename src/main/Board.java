@@ -65,6 +65,9 @@ public class Board {
         return emptySpots;
     }
 
+    /**
+     * Get all spots where a player of specified color would be allowed to place one
+     */
     public LinkedHashSet<Spot> getValidPlacementSpots(Flippo color) {
         LinkedHashSet<Spot> validPlacementSpots = new LinkedHashSet<>(getSpotSet());
         validPlacementSpots.removeIf(i -> ! i.isValidPlacementSpot());
@@ -111,6 +114,32 @@ public class Board {
             int y = string.charAt(0) - 'A';
             return getSpot(x, y);
         }
+    }
+
+    /**
+     * Get the score of the current state of the board
+     */
+    public Score getScore() {
+        /*Score score = new Score(-2, -2);
+        for (Spot spot : getSpotSet()) {
+            Flippo spotColor = spot.getFlippo();
+            if (spotColor != Flippo.NONE) {
+                score.put(spotColor, score.get(spotColor) + 1);
+            }
+        }*/
+
+        int black = -2;
+        int white = -2;
+        for (Spot spot : getSpotSet()) {
+            Flippo spotColor = spot.getFlippo();
+            if (spotColor == Flippo.BLACK) {
+                black ++;
+            } else if (spotColor == Flippo.WHITE) {
+                white ++;
+            }
+        }
+
+        return new Score(black, white);
     }
 
     /**
