@@ -81,9 +81,6 @@ class Board {
         return emptySpots;
     }
 
-    /**
-     * Get all spots where a player of specified color would be allowed to place one
-     */
     public LinkedHashSet<Spot> getValidPlacementSpots(Flippo color) {
         LinkedHashSet<Spot> validPlacementSpots = new LinkedHashSet<>(getSpotSet());
         validPlacementSpots.removeIf(i -> ! i.isValidPlacementSpot());
@@ -174,6 +171,13 @@ class Board {
         flipped.forEach(Spot::flip);
         spot.setFlippo(color);
         return flipped;
+    }
+
+    /**
+     * Flips all the spots in the list
+     */
+    public void flipSpots(Set<Spot> flips) {
+        flips.forEach(Spot::flip);
     }
 
     /**
@@ -401,93 +405,6 @@ class Judge {
 
 
 
-/**
- * Stores the act of doing a move
- */
-class Move {
-
-    private Board board;
-    private Spot spot;
-    private Flippo placeColor;
-
-    private LinkedHashSet<Spot> flipped;
-    private boolean executed;
-
-    /**
-     * Initiate the move if it is already executed
-     */
-    public Move(Board board, Spot spot, Flippo placeColor, LinkedHashSet<Spot> flipped) {
-        this.board = board;
-        this.spot = spot;
-        this.placeColor = placeColor;
-        this.flipped = flipped;
-        this.executed = true;
-    }
-
-    /**
-     * Initiate the move if it is not yet executed
-     */
-    public Move(Board board, Spot spot, Flippo placeColor) {
-        this.board = board;
-        this.spot = spot;
-        this.placeColor = placeColor;
-        this.executed = false;
-    }
-
-    /**
-     * Executes this move
-     */
-    public boolean execute() {
-        if (executed) {
-            System.err.println("Tried to execute already executed move");
-            return false;
-        } else {
-            flipped = board.doMove(spot, placeColor);
-            executed = true;
-            return true;
-        }
-    }
-
-
-    /**
-     * Undoes this move
-     */
-    public boolean undo() {
-        if (! executed) {
-            System.err.println("Tried to undo a move that is not yet executed");
-            return false;
-        } else {
-            flipped.forEach(Spot::flip);
-            spot.setFlippo(Flippo.NONE);
-            executed = false;
-            return true;
-        }
-    }
-
-    public Board getBoard() {
-        return board;
-    }
-
-    public Spot getSpot() {
-        return spot;
-    }
-
-    public Flippo getPlaceColor() {
-        return placeColor;
-    }
-
-
-    public LinkedHashSet<Spot> getFlipped() {
-        if (executed) {
-            return flipped;
-        } else {
-            return new LinkedHashSet<>();
-        }
-    }
-}
-
-
-
 
 /**
  * The main function that will run all other classes. Organizer
@@ -510,7 +427,6 @@ class Philippo {
         String line = sc.nextLine();
         boolean white = line.equals("Start");
         Flippo color = white ? Flippo.WHITE : Flippo.BLACK;
-        System.err.println("Computer plays color " + (white ? "white" : "black"));
         if (! white) {
             board.doMove(line, color.opposite());
         }
@@ -530,10 +446,6 @@ class Philippo {
             board.printBoard();
             board.doMove(sc.nextLine(), color.opposite());
         }
-        Score score = board.getScore();
-        System.err.println("Computer played color " + (white ? "white" : "black"));
-        System.err.println("Final score: Black " + score.get(Flippo.BLACK) +
-                " - " + score.get(Flippo.WHITE) + " White");
         // TODO NB: The above section is full bodge just to test
 
     }
@@ -658,8 +570,10 @@ class Spot {
  */
 class FirstPossibleStrategy extends Strategy {
 
+    private Board board;
+
     public FirstPossibleStrategy(Board board) {
-        super(board);
+        this.board = board;
     }
 
     @Override
@@ -675,7 +589,7 @@ class FirstPossibleStrategy extends Strategy {
  */
 class MaxImmediateScoreStrategy extends MinMaxStrategy {
 
-    public MaxImmediateScoreStrategy(Board board) {
+    MaxImmediateScoreStrategy(Board board) {
         super(board);
         super.setSearchDepth(1);
     }
@@ -692,15 +606,15 @@ class MaxImmediateScoreStrategy extends MinMaxStrategy {
 /**
  * A strategy that uses MinMax to find the best spot
  */
-class MinMaxStrategy extends Strategy {
+abstract class MinMaxStrategy extends Strategy {
 
-    private static final int DEFAULT_SEARCH_DEPTH = 3; // <= 3 if for all moves
+    private static final int DEFAULT_SEARCH_DEPTH = 5;
 
-    private int searchDepth;
+    private int searchDepth = DEFAULT_SEARCH_DEPTH;
+    private Board board;
 
-    public MinMaxStrategy(Board board) {
-        super(board);
-        this.searchDepth = DEFAULT_SEARCH_DEPTH;
+    MinMaxStrategy(Board board) {
+        this.board = board;
     }
 
     @Override
@@ -708,18 +622,15 @@ class MinMaxStrategy extends Strategy {
         Spot bestSpot = null;
         int bestScore = Integer.MIN_VALUE;
 
-        System.err.println("There are " + board.getValidPlacementSpots(color).size() + " possible spots");
         for (Spot spot : board.getValidPlacementSpots(color)) {
-            Move move = new Move(board, spot, color);
-            move.execute();
-            int posScore = getRecursiveScore(color.opposite(), searchDepth - 1).get(color);
+            LinkedHashSet<Spot> flips = board.doMove(spot, color);
+            int posScore = getRecursiveScore(color, searchDepth - 1).get(color);
             if (posScore > bestScore) {
                 bestScore = posScore;
                 bestSpot = spot;
             }
-            move.undo();
+            board.flipSpots(flips);
         }
-        System.err.println("Found best spot with score " + bestScore);
 
         return bestSpot;
     }
@@ -727,24 +638,18 @@ class MinMaxStrategy extends Strategy {
     /**
      * Get the MinMax best score for this color, looking a certain depth from here
      */
-    private Score getRecursiveScore(Flippo color, int depth) {
+    public Score getRecursiveScore(Flippo color, int depth) {
         if (depth <= 0) {
             return board.getScore();
         } else {
-            LinkedHashSet<Spot> validPlacementSpots = board.getValidPlacementSpots(color);
-            if (validPlacementSpots.size() <= 0) {
-                return board.getScore();
-            }
-
             Score bestScore = new Score(Integer.MIN_VALUE, Integer.MIN_VALUE);
-            for (Spot spot : validPlacementSpots) {
-                Move move = new Move(board, spot, color);
-                move.execute();
-                Score posScore = getRecursiveScore(color.opposite(), depth - 1);
+            for (Spot spot : board.getValidPlacementSpots(color)) {
+                LinkedHashSet<Spot> flips = board.doMove(spot, color);
+                Score posScore = getRecursiveScore(color, depth - 1);
                 if (posScore.get(color) > bestScore.get(color)) {
                     bestScore = posScore;
                 }
-                move.undo();
+                board.flipSpots(flips);
             }
 
             return bestScore;
@@ -768,10 +673,11 @@ class MinMaxStrategy extends Strategy {
  */
 class RandomStrategy extends Strategy {
 
-    public RandomStrategy(Board board) {
-        super(board);
-    }
+    private Board board;
 
+    public RandomStrategy(Board board) {
+        this.board = board;
+    }
 
     @Override
     public Spot getMove(Flippo color) {
@@ -790,9 +696,7 @@ class RandomStrategy extends Strategy {
  */
 abstract class Strategy {
 
-    public static final Class<? extends Strategy> DEFAULT_STRATEGY = MinMaxStrategy.class;
-
-    protected Board board;
+    public static final Class<? extends Strategy> DEFAULT_STRATEGY = MaxImmediateScoreStrategy.class;
 
     public static final List<Class<? extends Strategy>> STRATEGIES = Arrays.asList(
             RandomStrategy.class,
@@ -800,10 +704,6 @@ abstract class Strategy {
             MinMaxStrategy.class,
             MaxImmediateScoreStrategy.class
     );
-
-    public Strategy(Board board) {
-        this.board = board;
-    }
 
     public abstract Spot getMove(Flippo color);
 
@@ -821,10 +721,12 @@ class StrategyCollection extends Strategy {
 
     private HashMap<Class<? extends Strategy>, Strategy> strategyInstances;
 
+    private Board board;
+
     private Class<? extends Strategy> strategy;
 
     public StrategyCollection(Board board) {
-        super(board);
+        this.board = board;
         this.strategyInstances = new HashMap<>();
         this.strategy = Strategy.DEFAULT_STRATEGY;
     }

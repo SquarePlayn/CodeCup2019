@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
  */
 public class MinMaxStrategy extends Strategy {
 
-    private static final int DEFAULT_SEARCH_DEPTH = 4; // <= 4 if for all moves
+    private static final int DEFAULT_SEARCH_DEPTH = 3; // <= 3 if for all moves
 
     private int searchDepth;
 
